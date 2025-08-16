@@ -1,0 +1,6 @@
+Flask>=2.2
+torch>=1.7
+opencv-python
+requests
+Pillow
+pytest

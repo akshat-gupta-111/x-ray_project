@@ -1,0 +1,29 @@
+<!--
+create.html: Upload form for X-ray fracture detection
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fracture Detection - Upload X-ray</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>X-ray Fracture Detection</h1>
+        <form action="{{ url_for('create') }}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="uuid" value="{{ myid }}">
+            <label for="file">Select X-ray image (PNG/JPG):</label><br>
+            <input type="file" name="file" id="file" accept="image/png,image/jpeg" required><br>
+            <button type="submit">Upload & Detect</button>
+        </form>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flashes">{% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}</ul>
+          {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>

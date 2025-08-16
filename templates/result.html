@@ -1,0 +1,48 @@
+<!--
+result.html: Shows detection results and Gemini explanation (as beautiful card)
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Detection Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .summary-card {
+            background: #f8fafd;
+            border-radius: 12px;
+            box-shadow: 0 1px 6px #c0e0f0;
+            padding: 22px 28px;
+            margin: 28px 0;
+            font-size: 1.1em;
+        }
+        .gemini-section {
+            margin-top: 18px; 
+            background: #fffbe7; 
+            border-left: 4px solid #ffeb3b; 
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Detection Results</h1>
+        <div class="images">
+            <div>
+                <h3>Original X-ray</h3>
+                <img src="{{ orig_img }}" alt="Original Image" style="max-width:300px;">
+            </div>
+            <div>
+                <h3>Detected Fractures</h3>
+                <img src="{{ result_img }}" alt="Detected Image" style="max-width:300px;">
+            </div>
+        </div>
+        <div class="info">
+            <h3>AI Summary</h3>
+            {{ gemini_explanation|safe }}
+        </div>
+        <a href="{{ url_for('create') }}">Upload Another</a>
+    </div>
+</body>
+</html>
