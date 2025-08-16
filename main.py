@@ -24,7 +24,7 @@ import google.generativeai as genai
 UPLOAD_FOLDER = 'user_uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 MODEL_PATH = '/Users/akshatgupta111/Documents/main_app/best_fracture_yolov8.pt'
-GEMINI_API_KEY = "AIzaSyD2ZLstBUhaACqUdbWkoIMnEb6DiMGOY84"
+GEMINI_API_KEY = "key"
 
 app = Flask(__name__)
 app.secret_key = 'supersecret'
