@@ -1,3 +1,0 @@
-Fracture 1: label=Provided by a Roboflow user, confidence=0.89, box=[92, 230, 188, 366], size=13056
-Fracture 2: label=Provided by a Roboflow user, confidence=0.61, box=[455, 360, 524, 458], size=6762
-Fracture 3: label=Provided by a Roboflow user, confidence=0.31, box=[388, 304, 521, 427], size=16359

@@ -1,48 +1,139 @@
-<!--
-result.html: Shows detection results and Gemini explanation (as beautiful card)
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Detection Results</title>
+    <title>AI Result | {{ structured.task }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        .summary-card {
-            background: #f8fafd;
-            border-radius: 12px;
-            box-shadow: 0 1px 6px #c0e0f0;
-            padding: 22px 28px;
-            margin: 28px 0;
-            font-size: 1.1em;
-        }
-        .gemini-section {
-            margin-top: 18px; 
-            background: #fffbe7; 
-            border-left: 4px solid #ffeb3b; 
-            padding: 10px 18px;
-            border-radius: 8px;
-        }
+      .images { display:flex; gap:40px; flex-wrap:wrap; margin-top:10px; }
+      .images img { max-width:340px; border:1px solid #ddd; border-radius:8px; }
+      .card { background:#f8fafd; border-radius:12px; padding:22px 26px; box-shadow:0 2px 8px rgba(0,0,0,0.07); margin-top:24px; }
+      .sections { display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); margin-top:14px; }
+      .section-box { background:#fff; border:1px solid #dfe7ef; border-radius:10px; padding:14px 16px; }
+      .section-box h4 { margin:0 0 6px; font-size:0.95rem; letter-spacing:.5px; text-transform:uppercase; color:#2d5166; }
+      .badge { display:inline-block; background:#1273de; color:#fff; font-size:0.72em; padding:4px 9px; border-radius:14px; margin-left:10px; }
+      .high { background:#c0392b; }
+      .moderate { background:#e67e22; }
+      .low { background:#f39c12; }
+      .none { background:#2ecc71; }
+      pre.json { background:#1e2a31; color:#cfe9f5; padding:14px 18px; border-radius:10px; overflow:auto; font-size:0.8em; }
+      ul { margin-top:6px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Detection Results</h1>
-        <div class="images">
-            <div>
-                <h3>Original X-ray</h3>
-                <img src="{{ orig_img }}" alt="Original Image" style="max-width:300px;">
-            </div>
-            <div>
-                <h3>Detected Fractures</h3>
-                <img src="{{ result_img }}" alt="Detected Image" style="max-width:300px;">
-            </div>
-        </div>
-        <div class="info">
-            <h3>AI Summary</h3>
-            {{ gemini_explanation|safe }}
-        </div>
-        <a href="{{ url_for('create') }}">Upload Another</a>
-    </div>
+  <h1>AI Analysis Result
+    <br>
+    <span class="badge {{ structured.severity }}">{{ structured.severity|capitalize }}</span>
+  </h1>
+
+  <div class="images">
+      <div>
+          <h3>Original X-ray</h3>
+          <img src="{{ orig_img }}" alt="Original X-ray">
+      </div>
+      {% if annotated_img %}
+      <div>
+          <h3>Annotated</h3>
+          <img src="{{ annotated_img }}" alt="Annotated">
+      </div>
+      {% endif %}
+  </div>
+<div class="card">
+  <h2>Visual Inspection (Gemini)</h2>
+  {% set vi = structured.visual_inspection %}
+  <p><strong>Description:</strong> {{ vi.raw_description }}</p>
+  <p><strong>Detected type:</strong> {{ vi.detected_type }} (confidence hint {{ '%.2f'|format(vi.confidence_hint) }})</p>
+  <p style="font-size:0.85em;color:#555;"><strong>Rationale:</strong> {{ vi.rationale }}</p>
+</div>
+  <div class="card">
+      {% if structured.task == 'fracture_detection' %}
+        <h2>Fracture Findings</h2>
+        {% if structured.num_detections == 0 %}
+          <p style="color:green;"><strong>No fractures detected by model.</strong></p>
+        {% else %}
+          <ul>
+            {% for d in structured.detections %}
+              <li>{{ d.label }} - Conf {{ '%.2f'|format(d.confidence) }} - Box {{ d.box }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% elif structured.task == 'pneumonia_analysis' %}
+        <h2>Pneumonia Classification</h2>
+        <p>
+          Result: <strong>{{ structured.classification.label }}</strong> —
+          Confidence: {{ '%.3f'|format(structured.classification.confidence) }}
+        </p>
+        {% if structured.classification.probabilities %}
+          <h4>Class Probabilities</h4>
+          <ul>
+            {% for p in structured.classification.probabilities %}
+              <li>{{ structured.classification.class_names[loop.index0] }}: {{ '%.3f'|format(p) }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if structured.classification.label|lower == 'pneumonia' %}
+          <h3>Localization</h3>
+          {% if structured.regions_found == 0 %}
+            <p>No regions localized.</p>
+          {% else %}
+            <ul>
+              {% for r in structured.regional_detections %}
+                <li>{{ r.label }} - Conf {{ '%.2f'|format(r.confidence) }} - Box {{ r.box }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endif %}
+      {% endif %}
+  </div>
+
+  <div class="card">
+      <h2>AI Structured Explanation</h2>
+      <div class="sections">
+          <div class="section-box">
+              <h4>Summary</h4>
+              <p>{{ explanation.summary }}</p>
+          </div>
+          <div class="section-box">
+              <h4>Risk Level</h4>
+              <p>{{ explanation.risk_level|capitalize }}</p>
+          </div>
+          <div class="section-box">
+              <h4>Reasoning</h4>
+              <p>{{ explanation.reasoning }}</p>
+          </div>
+          <div class="section-box">
+              <h4>Detection Analysis</h4>
+              <p>{{ explanation.detection_analysis }}</p>
+          </div>
+          <div class="section-box">
+              <h4>Recommendations</h4>
+              <p>
+                {% if ';' in explanation.recommendations %}
+                  <ul>
+                  {% for seg in explanation.recommendations.split(';') if seg.strip() %}
+                    <li>{{ seg.strip() }}</li>
+                  {% endfor %}
+                  </ul>
+                {% else %}
+                  {{ explanation.recommendations }}
+                {% endif %}
+              </p>
+          </div>
+          <div class="section-box">
+              <h4>Follow Up</h4>
+              <p>{{ explanation.follow_up }}</p>
+          </div>
+          <div class="section-box">
+              <h4>Disclaimer</h4>
+              <p style="font-size:0.85em;color:#555;">{{ explanation.disclaimer }}</p>
+          </div>
+          <!-- Add inside the existing AI Structured Explanation card, or as a new card -->
+
+      </div>
+  </div>
+
+  <p style="margin-top:26px;">
+    <a href="{{ url_for('create') }}">Analyze Another Image</a>
+  </p>
 </body>
 </html>

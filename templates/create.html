@@ -1,29 +1,43 @@
-<!--
-create.html: Upload form for X-ray fracture detection
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fracture Detection - Upload X-ray</title>
+    <title>X-ray Analysis | Fracture & Pneumonia</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+      .panel { background:#f6f9fc; padding:26px 32px; border-radius:14px; max-width:560px; margin:48px auto;
+               box-shadow:0 2px 10px rgba(0,0,0,0.08); }
+      fieldset { border:1px solid #d0dce5; padding:12px 16px; border-radius:10px; }
+      legend { padding:0 6px; font-size:0.95em; color:#2c5368; }
+      label { display:block; margin:4px 0; cursor:pointer; }
+      .flash { margin-top:12px; color:#c0392b; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>X-ray Fracture Detection</h1>
-        <form action="{{ url_for('create') }}" method="post" enctype="multipart/form-data">
-            <input type="hidden" name="uuid" value="{{ myid }}">
-            <label for="file">Select X-ray image (PNG/JPG):</label><br>
-            <input type="file" name="file" id="file" accept="image/png,image/jpeg" required><br>
-            <button type="submit">Upload & Detect</button>
-        </form>
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul class="flashes">{% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}</ul>
-          {% endif %}
-        {% endwith %}
-    </div>
+  <div class="panel">
+      <h1>X-ray AI Analysis</h1>
+      <p>Select a task, upload an image (PNG/JPG). AI returns structured findings & explanation.</p>
+      <form method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="uuid" value="{{ myid }}">
+          <fieldset>
+              <legend>Task</legend>
+              <label><input type="radio" name="task_mode" value="fracture" checked> Fracture Detection</label>
+              <label><input type="radio" name="task_mode" value="pneumonia"> Classify & Detect Pneumonia</label>
+          </fieldset>
+          <div style="margin-top:16px;">
+              <input type="file" name="file" accept=".png,.jpg,.jpeg" required>
+          </div>
+          <div style="margin-top:20px;">
+              <button type="submit">Analyze Image</button>
+          </div>
+      </form>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="flash">
+            {% for m in messages %}<div>{{ m }}</div>{% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+  </div>
 </body>
 </html>
