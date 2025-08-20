@@ -47,6 +47,7 @@ user_uploads/
 # *.pt
 *.pth
 *.onnx
+*.backup
 
 # Logs
 *.log
