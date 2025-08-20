@@ -1,6 +1,10 @@
 Flask>=2.2
 torch>=1.7
-opencv-python
+torchvision
+opencv-python-headless
+ultralytics
+google-generativeai
 requests
 Pillow
-pytest
+numpy
+python-dotenv
