@@ -74,8 +74,13 @@
             
             const result = await response.json();
             
-            if (!response.ok) {
+            if (!response.ok && !result.demo_mode) {
                 throw new Error(result.error || 'Analysis failed');
+            }
+            
+            if (result.demo_mode) {
+                showDemoMessage(result);
+                return;
             }
             
             showResults(result);
@@ -103,6 +108,48 @@
     
     function hideResults() {
         document.getElementById('resultsContainer').classList.add('hidden');
+    }
+    
+    function showDemoMessage(data) {
+        const container = document.getElementById('resultsContainer');
+        container.innerHTML = `
+        <div style="max-width:600px; margin:40px auto; padding:20px; background:#f8fafd; border-radius:12px; text-align:center;">
+            <h2>🚀 Demo Deployment Active</h2>
+            <p><strong>${data.error}</strong></p>
+            <p>This is a working demo of the X-ray AI application architecture.</p>
+            
+            ${data.visual_inspection ? `
+            <div style="margin:20px 0; padding:15px; background:#e8f4fd; border-radius:8px;">
+                <h3>✅ AI Visual Inspection Working</h3>
+                <p><strong>Image Description:</strong> ${data.visual_inspection.raw_description}</p>
+                <p><strong>Detected Type:</strong> ${data.visual_inspection.detected_type}</p>
+                <p><strong>Confidence:</strong> ${data.visual_inspection.confidence_hint.toFixed(2)}</p>
+            </div>
+            ` : ''}
+            
+            <div style="margin:20px 0; padding:15px; background:#f0f8e8; border-radius:8px; text-align:left;">
+                <h3>🎯 Features Demonstrated:</h3>
+                <ul>
+                    <li>✅ Serverless Flask deployment on Vercel</li>
+                    <li>✅ Real-time image processing (in-memory)</li>
+                    <li>✅ Google Gemini AI integration</li>
+                    <li>✅ Responsive single-page application</li>
+                    <li>✅ Environment variable configuration</li>
+                    <li>⚠️ YOLO model inference (requires model files)</li>
+                </ul>
+            </div>
+            
+            <p style="margin-top:20px; color:#666; font-size:0.9em;">
+                To enable full AI inference, upload the trained model files to your deployment.
+            </p>
+            
+            <button onclick="location.reload()" style="margin-top:15px; background:#1273de; color:#fff; border:none; padding:10px 18px; border-radius:6px; cursor:pointer;">
+                Try Another Image
+            </button>
+        </div>
+        `;
+        container.classList.remove('hidden');
+        container.scrollIntoView({ behavior: 'smooth' });
     }
     
     function showResults(data) {

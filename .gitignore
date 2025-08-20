@@ -43,7 +43,7 @@ Thumbs.db
 # User uploads (not needed for serverless)
 user_uploads/
 
-# Model files (add to Git LFS if needed)
+# Model files (too large for Git/Vercel - use external storage)
 *.pt
 *.pth
 *.onnx

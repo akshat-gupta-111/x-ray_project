@@ -73,7 +73,7 @@ def get_model(model_type: str) -> Optional[YOLO]:
     
     path = model_paths.get(model_type)
     if not path or not os.path.exists(path):
-        log(f"Model {model_type} not found at {path}", "WARN")
+        log(f"Model {model_type} not found at {path}. This is expected for demo deployment.", "WARN")
         _models_cache[model_type] = None
         return None
     
@@ -461,7 +461,11 @@ def analyze():
         # Process based on task mode
         if task_mode == "fracture":
             if get_model("fracture") is None:
-                return jsonify({"error": "Fracture model unavailable."}), 500
+                return jsonify({
+                    "error": "Fracture model unavailable. This is a demo deployment without model files.",
+                    "demo_mode": True,
+                    "visual_inspection": visual
+                }), 200
             
             annotated_img, detections = detect_fractures_memory(image_array)
             annotated_img_bytes = image_to_bytes(annotated_img)
@@ -477,7 +481,11 @@ def analyze():
             
         elif task_mode == "pneumonia":
             if get_model("pneumonia_cls") is None:
-                return jsonify({"error": "Pneumonia classification model unavailable."}), 500
+                return jsonify({
+                    "error": "Pneumonia model unavailable. This is a demo deployment without model files.",
+                    "demo_mode": True,
+                    "visual_inspection": visual
+                }), 200
             
             label, conf, probs, class_names = classify_pneumonia_memory(image_array)
             region_img, regions = detect_pneumonia_regions_memory(image_array, label)
